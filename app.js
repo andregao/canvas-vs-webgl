@@ -1,44 +1,71 @@
 const c = document.getElementById("myCanvas");
-c.addEventListener('mousemove',handleMousemove);
+c.addEventListener("mousemove", handleMousemove);
 c.width = window.innerWidth;
 c.height = window.innerHeight;
 const ctx = c.getContext("2d");
 ctx.strokeStyle = "rgba(0,0,0,0)";
 
-class Circle {
-  r = Math.random() * 255;
-  g = Math.random() * 255;
-  b = Math.random() * 255;
+let x = 400;
+let y = 400;
+const cursorArea = 70;
+const largest = 50;
+const scaleDelta = 2.5;
+const circleCount = 500;
+const colorSwatches = ["#333333", "orangered", "gainsboro", "gray"];
 
-  radius = Math.random() * 50 + 30;
-  center = {
-    x: Math.random() * (innerWidth - this.radius * 2) + this.radius,
-    y: Math.random() * (innerHeight - this.radius * 2) + this.radius
-  };
-  directionX = Math.round(Math.random()) ? 1 : -1;
-  directionY = Math.round(Math.random()) ? 1 : -1;
-  deltaX = this.directionX * (Math.random() - 0.5);
-  deltaY = this.directionY * (Math.random() - 0.5);
+class Circle {
+  constructor() {
+    this.r = Math.random() * 255;
+    this.g = Math.random() * 255;
+    this.b = Math.random() * 255;
+    this.color = colorSwatches[Math.floor(Math.random() * 4)];
+
+    this.radius = Math.random() * 10 + 4;
+    this.newRadius = this.radius;
+    this.center = {
+      x: Math.random() * (innerWidth - this.radius * 2) + this.radius,
+      y: Math.random() * (innerHeight - this.radius * 2) + this.radius
+    };
+    this.directionX = Math.round(Math.random()) ? 1 : -1;
+    this.directionY = Math.round(Math.random()) ? 1 : -1;
+    this.deltaX = this.directionX * Math.random();
+    this.deltaY = this.directionY * Math.random();
+  }
 
   draw() {
     this.center.x += this.deltaX;
     this.center.y += this.deltaY;
-    const leftEdge = this.center.x - this.radius;
-    const rightEdge = this.center.x + this.radius;
-    const topEdge = this.center.y - this.radius;
-    const bottomEdge = this.center.y + this.radius;
+    if (
+      Math.abs(this.center.x - x) <= this.radius + cursorArea &&
+      Math.abs(this.center.y - y) <= this.radius + cursorArea
+    ) {
+      this.newRadius <= largest && (this.newRadius += scaleDelta);
+    } else {
+      this.newRadius >= this.radius && (this.newRadius -= scaleDelta);
+    }
+    const leftEdge = this.center.x - this.newRadius;
+    const rightEdge = this.center.x + this.newRadius;
+    const topEdge = this.center.y - this.newRadius;
+    const bottomEdge = this.center.y + this.newRadius;
     (rightEdge >= innerWidth || leftEdge <= 0) && (this.deltaX = -this.deltaX);
     (bottomEdge >= innerHeight || topEdge <= 0) && (this.deltaY = -this.deltaY);
     ctx.beginPath();
-    ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2, false);
+    ctx.arc(
+      this.center.x,
+      this.center.y,
+      this.newRadius,
+      0,
+      Math.PI * 2,
+      false
+    );
     ctx.stroke();
-    ctx.fillStyle = `rgb(${this.r},${this.g},${this.b})`;
+    ctx.fillStyle = this.color;
     ctx.fill();
   }
 }
 
 const circles = [];
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < circleCount; i++) {
   circles.push(new Circle());
 }
 
@@ -47,35 +74,10 @@ function animate() {
   circles.forEach(c => c.draw());
   requestAnimationFrame(() => animate());
 }
+
 animate();
 
-function handleMousemove() {
-  console.log('test')
+function handleMousemove(e) {
+  x = e.clientX;
+  y = e.clientY;
 }
-
-// const center = {
-//   x: Math.random() * (innerWidth - radius * 2) + radius,
-//   y: Math.random() * (innerHeight - radius * 2) + radius
-// };
-// const directionX = Math.round(Math.random()) ? 1 : -1;
-// const directionY = Math.round(Math.random()) ? 1 : -1;
-// let deltaX = directionX * (Math.random() * 2 + 1);
-// let deltaY = directionY * (Math.random() * 3 + 1);
-//
-// const animate = () => {
-//   ctx.clearRect(0, 0, innerWidth, innerHeight);
-//   center.x += deltaX;
-//   center.y += deltaY;
-//
-//   ctx.beginPath();
-//   const leftEdge = center.x - radius;
-//   const rightEdge = center.x + radius;
-//   const topEdge = center.y - radius;
-//   const bottomEdge = center.y + radius;
-//   (rightEdge >= innerWidth || leftEdge <= 0) && (deltaX = -deltaX);
-//   (bottomEdge >= innerHeight || topEdge <= 0) && (deltaY = -deltaY);
-//   ctx.arc(center.x, center.y, radius, 0, Math.PI * 2, false);
-//   ctx.stroke();
-//   requestAnimationFrame(() => animate());
-// };
-// animate();
