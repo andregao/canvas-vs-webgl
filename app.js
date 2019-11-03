@@ -1,12 +1,14 @@
 const c = document.getElementById("myCanvas");
 c.addEventListener("mousemove", handleMousemove);
+c.addEventListener("touchmove", handleTouchmove);
+c.addEventListener("touchend", handleTouchend);
 c.width = window.innerWidth;
 c.height = window.innerHeight;
 const ctx = c.getContext("2d");
 ctx.strokeStyle = "rgba(0,0,0,0)";
 
-let x = 400;
-let y = 400;
+let x = Infinity;
+let y = Infinity;
 const cursorArea = 70;
 const largest = 50;
 const scaleDelta = 2.5;
@@ -80,4 +82,17 @@ animate();
 function handleMousemove(e) {
   x = e.clientX;
   y = e.clientY;
+}
+function handleTouchmove(e) {
+  const {
+    targetTouches: {
+      0: { clientX: tx, clientY: ty }
+    }
+  } = e;
+  x = tx;
+  y = ty;
+}
+function handleTouchend() {
+  x = Infinity;
+  y = Infinity;
 }
