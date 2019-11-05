@@ -3,15 +3,15 @@ c.addEventListener("mousemove", handleMousemove);
 c.addEventListener("touchmove", handleTouchmove);
 c.addEventListener("touchend", handleTouchend);
 c.addEventListener("mouseleave", handleTouchend);
-window.addEventListener("resize", handleResize);
+window.addEventListener("resize", appInit);
 
 const ctx = c.getContext("2d");
 
 let x = Infinity;
 let y = Infinity;
-const cursorArea = 70;
+const cursorArea = 40;
 const largest = 50;
-const scaleDelta = 2.5;
+const scaleDelta = 2;
 const colorSwatches = ["#333333", "orangered", "gainsboro", "gray"];
 let circleCount;
 let circles = [];
@@ -22,11 +22,11 @@ class Circle {
     this.color =
       colorSwatches[Math.floor(Math.random() * colorSwatches.length)];
 
-    this.radius = Math.random() * 10 + 4;
+    this.radius = Math.random() * 10 + 2;
     this.newRadius = this.radius;
     this.center = {
-      x: Math.random() * (innerWidth - this.radius * 2) + this.radius,
-      y: Math.random() * (innerHeight - this.radius * 2) + this.radius
+      x: Math.random() * (window.innerWidth - this.radius * 2) + this.radius,
+      y: Math.random() * (window.innerHeight - this.radius * 2) + this.radius
     };
     this.deltaX = Math.random() * 2 - 1;
     this.deltaY = Math.random() * 2 - 1;
@@ -35,14 +35,16 @@ class Circle {
   draw() {
     this.center.x += this.deltaX;
     this.center.y += this.deltaY;
+    // calculate new radius base on cursor position
     if (
-      Math.abs(this.center.x - x) <= this.radius + cursorArea &&
-      Math.abs(this.center.y - y) <= this.radius + cursorArea
+      Math.abs(this.center.x - x) <= this.newRadius + cursorArea &&
+      Math.abs(this.center.y - y) <= this.newRadius + cursorArea
     ) {
-      this.newRadius <= largest && (this.newRadius += scaleDelta);
+      this.newRadius < largest && (this.newRadius += scaleDelta);
     } else {
-      this.newRadius >= this.radius && (this.newRadius -= scaleDelta);
+      this.newRadius > this.radius && (this.newRadius -= scaleDelta);
     }
+    // set new position delta to bounce off screen edges
     const leftEdge = this.center.x - this.newRadius;
     const rightEdge = this.center.x + this.newRadius;
     const topEdge = this.center.y - this.newRadius;

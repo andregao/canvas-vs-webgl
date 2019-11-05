@@ -1,34 +1,54 @@
-const app = new PIXI.Application({
+document.body.addEventListener("mouseleave", handlePointerOut);
+document.body.addEventListener("touchend", handlePointerOut);
+window.addEventListener("resize", appInit);
+
+let app = new PIXI.Application({
   width: window.innerWidth,
   height: window.innerHeight,
   antialias: true,
-  backgroundColor: 0xeeeeee
+  backgroundColor: 0xffffff
 });
 document.body.appendChild(app.view);
-app.stage.sortableChildren = true;
+app.stage.interactive = true;
+app.stage.on("pointermove", handlePointermoveStage);
 
-const circlesArray = [];
-let circleCount = 500;
+let circleCount;
+let mouseCircleInitialX;
+let circlesArray;
 const maxRadius = 50;
-const mouseCircleRadius = 30;
+const mouseCircleRadius = 40;
 const positionDeltaFactor = 2;
-const scaleDelta = 0.3;
+const scaleDelta = 0.2;
+const colorSwatches = [0x333333, 0xff4500, 0xdcdcdc, 0x808080];
 
+function appInit() {
+  // calculate circle count and off screen position
+  app.resizeTo = window;
+  circleCount = Math.floor((window.innerWidth * window.innerHeight) / 1000);
+  mouseCircleInitialX = window.innerWidth + mouseCircleRadius * 3;
+  mouseCircle.position.x = mouseCircleInitialX;
+
+  // initialize all circles
+  circlesArray = [];
+  let circles = new PIXI.Container();
+  for (let i = 0; i < circleCount; i++) {
+    const c = makeCircle();
+    circlesArray.push(c);
+    circles.addChild(c);
+  }
+  app.stage.removeChildren();
+  app.stage.addChild(circles);
+}
+
+// cursor area for interaction
 const mouseCircle = new PIXI.Graphics();
-mouseCircle.beginFill(0x000000, 0.3);
+mouseCircle.beginFill(0x000000);
 mouseCircle.drawCircle(0, 0, mouseCircleRadius);
 mouseCircle.endFill();
-mouseCircle.zIndex = 1;
-app.stage.addChild(mouseCircle);
-
-const colorSwatches = [0x333333, 0xff4500, 0xdcdcdc, 0x808080];
-let circles = new PIXI.Container();
-circles.zIndex = 0;
-app.stage.addChild(circles);
 
 function makeCircle() {
   const shape = new PIXI.Graphics();
-  const radius = Math.random() * 10 + 4;
+  const radius = Math.random() * 10 + 2;
   shape.lineStyle(0);
   const color = colorSwatches[Math.floor(Math.random() * colorSwatches.length)];
   const position = {
@@ -46,11 +66,7 @@ function makeCircle() {
   return shape;
 }
 
-for (let i = 0; i < circleCount; i++) {
-  const c = makeCircle();
-  circlesArray.push(c);
-  circles.addChild(c);
-}
+appInit();
 
 app.ticker.add(() => {
   circlesArray.forEach(c => {
@@ -60,7 +76,6 @@ app.ticker.add(() => {
       Math.abs(mouseCircle.x - c.x) <= mouseCircleRadius + radius &&
       Math.abs(mouseCircle.y - c.y) <= mouseCircleRadius + radius
     ) {
-      // console.log("overlap");
       if (radius < maxRadius) {
         c.scale.x += scaleDelta;
         c.scale.y += scaleDelta;
@@ -71,8 +86,7 @@ app.ticker.add(() => {
         c.scale.y -= scaleDelta;
       }
     }
-
-    // bounce off screen edges
+    // set new position delta to bounce off screen edges
     let newRadius = c.width / 2;
     const leftEdge = c.x - newRadius;
     const rightEdge = c.x + newRadius;
@@ -85,16 +99,11 @@ app.ticker.add(() => {
   });
 });
 
-app.stage.interactive = true;
-app.stage.on("pointermove", handlePointermoveStage);
-app.stage.on("pointerout", handlePointeroutStage);
-
 function handlePointermoveStage(e) {
   mouseCircle.position.x = e.data.global.x;
   mouseCircle.position.y = e.data.global.y;
 }
 
-function handlePointeroutStage() {
-  // console.log("pointer out stage");
-  // mouseCircle.position.x = mouseCircle.position.y = -50;
+function handlePointerOut() {
+  mouseCircle.position.x = mouseCircleInitialX;
 }
