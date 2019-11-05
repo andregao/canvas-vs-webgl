@@ -2,25 +2,25 @@ const c = document.getElementById("myCanvas");
 c.addEventListener("mousemove", handleMousemove);
 c.addEventListener("touchmove", handleTouchmove);
 c.addEventListener("touchend", handleTouchend);
-c.width = window.innerWidth;
-c.height = window.innerHeight;
+c.addEventListener("mouseleave", handleTouchend);
+window.addEventListener("resize", handleResize);
+
 const ctx = c.getContext("2d");
-ctx.strokeStyle = "rgba(0,0,0,0)";
 
 let x = Infinity;
 let y = Infinity;
 const cursorArea = 70;
 const largest = 50;
 const scaleDelta = 2.5;
-const circleCount = 500;
 const colorSwatches = ["#333333", "orangered", "gainsboro", "gray"];
+let circleCount;
+let circles = [];
+let requestId = null;
 
 class Circle {
   constructor() {
-    this.r = Math.random() * 255;
-    this.g = Math.random() * 255;
-    this.b = Math.random() * 255;
-    this.color = colorSwatches[Math.floor(Math.random() * 4)];
+    this.color =
+      colorSwatches[Math.floor(Math.random() * colorSwatches.length)];
 
     this.radius = Math.random() * 10 + 4;
     this.newRadius = this.radius;
@@ -28,10 +28,8 @@ class Circle {
       x: Math.random() * (innerWidth - this.radius * 2) + this.radius,
       y: Math.random() * (innerHeight - this.radius * 2) + this.radius
     };
-    this.directionX = Math.round(Math.random()) ? 1 : -1;
-    this.directionY = Math.round(Math.random()) ? 1 : -1;
-    this.deltaX = this.directionX * Math.random();
-    this.deltaY = this.directionY * Math.random();
+    this.deltaX = Math.random() * 2 - 1;
+    this.deltaY = Math.random() * 2 - 1;
   }
 
   draw() {
@@ -60,29 +58,41 @@ class Circle {
       Math.PI * 2,
       false
     );
+    ctx.strokeStyle = "transparent";
     ctx.stroke();
     ctx.fillStyle = this.color;
     ctx.fill();
   }
 }
 
-const circles = [];
-for (let i = 0; i < circleCount; i++) {
-  circles.push(new Circle());
+appInit();
+
+function appInit() {
+  requestId && window.cancelAnimationFrame(requestId);
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
+  circleCount = Math.floor((c.width * c.height) / 1000);
+
+  circles = [];
+  for (let i = 0; i < circleCount; i++) {
+    circles.push(new Circle());
+  }
+  animate();
 }
 
 function animate() {
-  ctx.clearRect(0, 0, innerWidth, innerHeight);
-  circles.forEach(c => c.draw());
-  requestAnimationFrame(() => animate());
+  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  circles.forEach(c => {
+    c.draw();
+  });
+  requestId = window.requestAnimationFrame(() => animate());
 }
-
-animate();
 
 function handleMousemove(e) {
   x = e.clientX;
   y = e.clientY;
 }
+
 function handleTouchmove(e) {
   const {
     targetTouches: {
@@ -92,7 +102,12 @@ function handleTouchmove(e) {
   x = tx;
   y = ty;
 }
+
 function handleTouchend() {
   x = Infinity;
   y = Infinity;
+}
+
+function handleResize() {
+  appInit();
 }
