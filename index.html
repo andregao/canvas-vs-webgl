@@ -8,17 +8,27 @@
     />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <link rel="icon" type="image/gif" href="pixi.png" />
+    <link rel="stylesheet" href="styles.css" />
     <title>Canvas vs WebGL</title>
   </head>
-  <body
-    style="margin: 0;height: 100vh; font-family: sans-serif; text-align: center;"
-  >
-    <main
-      style="height: 100%;display: flex;flex-direction: column; justify-content: center; align-items: center"
-    >
-      <a href="canvas.html" style="text-decoration: none"><h1>Vanilla Canvas</h1></a>
-      <h3>vs</h3>
-      <a href="webgl.html" style="text-decoration: none"><h1>WebGL via PixiJS</h1></a>
+  <body>
+    <main>
+      <video autoplay loop muted>
+        <source src="background.mp4" type="video/mp4" />
+      </video>
+      <section>
+        <h1 class="canvas"><a href="canvas.html">Javascript Canvas</a></h1>
+        <h3>vs</h3>
+        <h1 class="webgl"><a href="webgl.html">WebGL via PixiJS</a></h1>
+      </section>
     </main>
+    <footer>
+      <a href="https://github.com/andregao/canvas-vs-webgl" target="_blank"
+        ><img
+          height="32"
+          width="32"
+          src="https://unpkg.com/simple-icons@latest/icons/github.svg"
+      /></a>
+    </footer>
   </body>
 </html>
